@@ -6,10 +6,10 @@
 using namespace std;
 
 const int SEQUENCE_ARRAY_LENGTH = 40;
-const int NUMBERS_POOL_LENGTH = 4;
+const int NUMBERS_POOL_LENGTH = 5;
 
 void countEntries(int arr[], int arrayLength) {
-  int entries[4];
+  int entries[NUMBERS_POOL_LENGTH];
 
   for (int i = 0; i < NUMBERS_POOL_LENGTH; i++) {
     entries[i] = 0;

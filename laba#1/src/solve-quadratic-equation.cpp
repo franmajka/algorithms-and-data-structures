@@ -7,7 +7,7 @@ using namespace std;
 // Решает квадратное уравнение
 // Возвращает строку в которой указан ответ
 string solveQuadraticEquation(int a, int b, int c) {
-  float discriminant = pow(b, 2) - 4 * a * c;
+  int discriminant = pow(b, 2) - 4 * a * c;
 
   if (discriminant > 0) {
     float x1 = (-b - sqrt(discriminant)) / (2 * a);

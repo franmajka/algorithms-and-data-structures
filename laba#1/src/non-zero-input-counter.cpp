@@ -38,7 +38,7 @@ int main() {
       continue;
     }
 
-    cleanInput(cond);
+    fflush(stdin);
   };
 
   cout << "У тебя получилось. Количество попыток: " << counter << endl;
