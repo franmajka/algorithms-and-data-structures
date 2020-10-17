@@ -8,7 +8,7 @@ using namespace std;
 bool isPrime(int n) {
   if ((n % 2 == 0 && n != 2) || n == 1) return false;
 
-  for (int d = 3; d <= sqrt(n); d += 2) {
+  for (int d = 3; d <= (int)(sqrt(n)); d += 2) {
     if (n % d == 0) {
       return false;
     }
@@ -93,7 +93,7 @@ int main() {
 
   clock_t start = clock();
   for (int i = 0; i < numberOfTests; i++) {
-    getPrimesDumb(N);
+    delete [] getPrimesDumb(N);
   }
   clock_t end = clock();
   float dumbAverage = ((float)(end - start)) / numberOfTests / CLOCKS_PER_SEC;
@@ -108,6 +108,8 @@ int main() {
   cout << "Для нахождения всех простых чисел на промежутке от 0 до " << N <<
     " путем перебора всех делителей числа приходилось потратить в среднем " << dumbAverage << " секунд " <<
     "а с помощью решета Эратосфена всего " << eratosthenesAverage << " секунд";
+
+  delete [] primes;
 
   return 0;
 }

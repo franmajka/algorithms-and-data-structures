@@ -5,10 +5,11 @@ using namespace std;
 
 // ѕринимает целое число а и натуральное b
 int recursivePow(int a, unsigned int b) {
-  if (b == 0) {
+  if (b <= 1) {
     return 1;
   }
-  return b == 1 ? a : recursivePow(a, b - 1) * a;
+
+  return recursivePow(a, b - 1) * a;
 }
 
 int main() {

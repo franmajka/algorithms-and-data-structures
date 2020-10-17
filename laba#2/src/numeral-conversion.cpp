@@ -39,15 +39,15 @@ string convertBase(string a, unsigned short int fromBase, unsigned short int toB
 
   //  онвертируем в дес€тичную
   a = reverse(a);
-  unsigned int aDecimial = 0;
+  unsigned int aDecimal = 0;
   for (int i = 0; i < a.length(); i++) {
-    aDecimial += getValueOfNumeral(a[i]) * pow(fromBase, i);
+    aDecimal += getValueOfNumeral(a[i]) * round(pow(fromBase, i));
   }
 
   string converted = "";
-  while (aDecimial) {
-    converted += NUMS_ARRAY[aDecimial % toBase];
-    aDecimial /= toBase;
+  while (aDecimal) {
+    converted += NUMS_ARRAY[aDecimal % toBase];
+    aDecimal /= toBase;
   }
 
   return reverse(converted);
@@ -69,7 +69,7 @@ int main() {
   cout << "¬ведите натуральное число, которое обозначает основание системы счислени€, в которую вы желаете конвертировать число a: ";
   cin >> toBase;
 
-  if (fromBase == 0 || toBase == 0 || fromBase > NUMS_ARRAY_LENGTH || toBase > NUMS_ARRAY_LENGTH) {
+  if (fromBase < 2 || toBase < 2 || fromBase > NUMS_ARRAY_LENGTH || toBase > NUMS_ARRAY_LENGTH) {
     cout << "Ќекоректное основание системы счислени€";
     return 1;
   }
