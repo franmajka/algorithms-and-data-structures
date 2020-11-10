@@ -11,8 +11,7 @@ int func(int x) {
   return pow(x, 3) - 2 * pow(x, 2) + x - 1;
 }
 
-int main()
-{
+int main() {
   setlocale(LC_ALL, "rus");
 
   int maxY = func(xStart);
