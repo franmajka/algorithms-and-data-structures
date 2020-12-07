@@ -29,6 +29,7 @@ int* getPrimesDumb(int N) {
 
 int* sieveOfEratosthenes(int N) {
   bool *sieve = new bool[N];
+  int counter = 0;
 
   sieve[0] = false;
   sieve[1] = false;
@@ -39,13 +40,15 @@ int* sieveOfEratosthenes(int N) {
   for (int i = 2; i <= sqrt(N); i++) {
     if (!sieve[i]) continue;
 
+    counter++;
+
     for (int j = i * i; j < N; j += i) {
       sieve[j] = false;
     }
   }
 
-  int *primes = new int[N];
-  for (int i = 0, index = 0; i < N; i++) {
+  int *primes = new int[counter];
+  for (int i = 0, index = 0; i < counter; i++) {
     if (!sieve[i]) continue;
 
     primes[index] = i;

@@ -1,5 +1,3 @@
-#include "sorts.hpp"
-
 #include "basic.hpp"
 
 void bubbleSort(int *arr, int length, bool (*compare)(int, int)) {
@@ -56,6 +54,7 @@ void selectionSort(int *arr, int length, bool (*compare)(int, int)) {
     maxPos = i;
     for (int j = i + 1; j < length; j++) {
       if (compare(arr[maxPos], arr[j])) continue;
+
       maxPos = j;
     }
 
