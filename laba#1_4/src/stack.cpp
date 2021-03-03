@@ -92,7 +92,7 @@ struct Book {
   string author;
 
   // Принимает строку в формате "Н | КС | А"
-  // В случае любой возможной ошибки вызывает BAD_FORMAT
+  // В случае любой возможной ошибки выбрасывает BAD_FORMAT
   Book(string input) {
     ArrayWithLength<string> *arrS = strSplit(input, "|");
 

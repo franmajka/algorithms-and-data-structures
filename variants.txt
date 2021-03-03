@@ -1,3 +1,6 @@
-laba#1=16
-laba#2=16
-laba#3=16
+laba#1_1=16
+laba#1_2=16
+laba#1_3=16
+laba#1_4=16
+laba#2_1=16
+laba#2_2=16

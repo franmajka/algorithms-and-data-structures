@@ -47,7 +47,8 @@ void shakerSort(int *arr, int length, bool (*compare)(int, int)) {
   } while(!sorted);
 }
 
-void selectionSort(int *arr, int length, bool (*compare)(int, int)) {
+template <typename T>
+void selectionSort(T *arr, int length, bool (*compare)(T, T)) {
   int maxPos;
 
   for (int i = 0; i < length - 1; i++) {
@@ -71,7 +72,8 @@ void insertionSort(int *arr, int length, bool (*compare)(int, int)) {
   }
 }
 
-void quickSort(int *arr, bool (*compare)(int, int), int start, int end) {
+template <typename T>
+void quickSort(T *arr, bool (*compare)(T, T), int start, int end) {
   if (end - start <= 1) return;
 
   int pi = start;
@@ -89,6 +91,7 @@ void quickSort(int *arr, bool (*compare)(int, int), int start, int end) {
   quickSort(arr, compare, pi + 1, end);
 }
 
-void quickInSort(int *arr, int length, bool (*compare)(int, int)) {
+template <typename T>
+void quickInSort(T *arr, int length, bool (*compare)(T, T)) {
   quickSort(arr, compare, 0, length);
 }

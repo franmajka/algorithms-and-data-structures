@@ -17,7 +17,7 @@ int getFirstDigit(int n) {
 bool compare(int a, int b) {
   int firstDigitA = getFirstDigit(a);
   int firstDigitB = getFirstDigit(b);
-  if(firstDigitA == firstDigitB) {
+  if (firstDigitA == firstDigitB) {
     return a < b;
   }
   return firstDigitA < firstDigitB;

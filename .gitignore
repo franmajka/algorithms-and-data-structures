@@ -1,2 +1,13 @@
 .vscode
+.vs
+x64
+*.sln
+*.vcxproj
+*.filters
+*.user
+*.tlog
+*.obj
+*.enc
+*.log
+*.recipe
 ads.code-workspace
