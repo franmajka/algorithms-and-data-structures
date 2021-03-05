@@ -19,7 +19,7 @@ const std::string SUBJECTS[N] = {
 
 ControlWork::ControlWork() {
 	m_subject = SUBJECTS[rand() % N];
-	m_numberOfTasks = rand() % 20;
+	m_numberOfTasks = 1 + (rand() % 20);
 	m_probabilityOfWriteOff = rand() % 101;
 }
 

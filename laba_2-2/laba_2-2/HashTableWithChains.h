@@ -16,26 +16,25 @@ public:
 	HashTableWithChains(const HashTableWithChains&);
 	~HashTableWithChains();
 
-	V* find(K key);
+	V* find(const K& key);
 
-	V& operator[] (K key);
-	const V& operator[] (K key) const;
-
-	HashTableWithChains<K, V>& operator= (const HashTableWithChains<K, V>&);
-	const HashTableWithChains<K, V>& operator= (const HashTableWithChains<K, V>&) const;
-
-	template <class T>
-	V& operator[] (T key);
-
-	template <class T>
-	const V& operator[] (T key) const;
-
-	void insert(K key, V value);
-	void erase(K key);
+	void insert(const K& key, const V& value);
+	void erase(const K& key);
 
 	void clear();
 
+	V& operator[] (const K& key);
+	template <class T>
+	V& operator[] (const T& key);
+
+	const V& operator[] (const K& key) const;
+	template <class T>
+	const V& operator[] (const T& key) const;
+
+	HashTableWithChains<K, V>& operator= (const HashTableWithChains<K, V>&);
+	const HashTableWithChains<K, V>& operator= (const HashTableWithChains<K, V>&) const;
 private:
+	
 	void rehash(bool isLoaded);
 
 	LinkedList<HashNode> *m_bucketsArray;
@@ -86,7 +85,7 @@ void HashTableWithChains<K, V>::rehash(bool isLoaded) {
 
 
 template <class K, class V>
-V* HashTableWithChains<K, V>::find(K key) {
+V* HashTableWithChains<K, V>::find(const K& key) {
 	size_t idx = HashTableBase<K,V>::hash(key);
 	for (HashNode& hashNode : m_bucketsArray[idx]) {
 		if (hashNode.key == key) return &hashNode.value;
@@ -96,11 +95,12 @@ V* HashTableWithChains<K, V>::find(K key) {
 }
 
 template <class K, class V>
-V& HashTableWithChains<K, V>::operator[] (K key) {
+V& HashTableWithChains<K, V>::operator[] (const K& key) {
+	V* ptr = find(key);
+
+	if (ptr != NULL) return *ptr;
+
 	size_t idx = HashTableBase<K, V>::hash(key);
-	for (HashNode& hashNode : m_bucketsArray[idx]) {
-		if (hashNode.key == key) return hashNode.value;
-	}
 
 	m_bucketsArray[idx].pushBack(HashNode(key));
 	HashTableBase<K, V>::m_size++;
@@ -108,22 +108,21 @@ V& HashTableWithChains<K, V>::operator[] (K key) {
 }
 
 template <class K, class V> template <class T>
-V& HashTableWithChains<K, V>::operator[] (T key) {
+V& HashTableWithChains<K, V>::operator[] (const T& key) {
 	return (*this)[K(key)];
 }
 
 template <class K, class V>
-const V& HashTableWithChains<K, V>::operator[] (K key) const {
-	size_t idx = hash(key);
-	for (HashNode& hashNode : m_bucketsArray[idx]) {
-		if (hashNode.key == key) return hashNode.value;
-	}
+const V& HashTableWithChains<K, V>::operator[] (const K& key) const {
+	V* ptr = find(key);
+
+	if (ptr != NULL) return *ptr;
 
 	throw "There is no such key in the hash table";
 }
 
 template <class K, class V> template <class T> 
-const V& HashTableWithChains<K, V>::operator[] (T key) const {
+const V& HashTableWithChains<K, V>::operator[] (const T& key) const {
 	return (*this)[K(key)];
 }
 
@@ -148,7 +147,7 @@ const HashTableWithChains<K, V>& HashTableWithChains<K, V>::operator= (const Has
 
 
 template <class K, class V>
-void HashTableWithChains<K, V>::insert(K key, V value) {
+void HashTableWithChains<K, V>::insert(const K& key, const V& value) {
 	V* inTableValue = find(key);
 	if (inTableValue != NULL) {
 		*inTableValue = value;
@@ -162,7 +161,7 @@ void HashTableWithChains<K, V>::insert(K key, V value) {
 }
 
 template <class K, class V>
-void HashTableWithChains<K, V>::erase(K key) {
+void HashTableWithChains<K, V>::erase(const K& key) {
 	size_t idx = HashTableBase<K, V>::hash(key);
 	size_t i = 0;
 	for (HashNode& hashNode : m_bucketsArray[idx]) {

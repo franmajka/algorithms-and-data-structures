@@ -25,7 +25,7 @@ protected:
 	size_t m_capacity = M;
 
 	const float unloadFactor = .25;
-	const float loadFactor = 1.25;
+	const float loadFactor = .75;
 };
 
 template <class K, class V>

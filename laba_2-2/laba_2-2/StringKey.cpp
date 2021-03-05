@@ -7,7 +7,7 @@ StringKey::StringKey() {
 	m_key = "";
 	
 	for (int i = 0; i < 10; i++) {
-		m_key += 'a' + (rand() % ('z' - 'a'));
+		m_key += 'a' + (rand() % ('z' - 'a' + 1));
 	}
 }
 
