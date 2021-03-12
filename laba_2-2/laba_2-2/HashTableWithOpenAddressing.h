@@ -12,10 +12,51 @@
 template <class K, class V>
 class HashTableWithOpenAddressing : public HashTableBase<K, V>
 {
+private: 
+	struct HashNode : public HashTableBase<K, V>::HashNode {
+		bool isDeleted = false;
+
+		HashNode(const K& key, const V& value) : HashTableBase<K, V>::HashNode(key, value) {}
+		HashNode(const K& key) : HashTableBase<K, V>::HashNode(key) {}
+	};
+
 public:
+	template <bool Const = false>
+	class Iterator {
+		friend class HashTableWithOpenAddressing<K, V>;
+		
+	public:
+		using pointer = std::conditional_t<Const, const HashNode**, HashNode**>;
+		using reference = std::conditional_t<Const, const std::pair<K, V>, std::pair<K, V>>;
+
+	private:
+		pointer p;
+		int countdown;
+
+		Iterator(pointer ap, int acountdown);
+	public:
+		Iterator(const Iterator& it) : p(it.p), countdown(it.countdown) {}
+
+		bool operator!= (const Iterator&) const;
+		bool operator== (const Iterator&) const;
+
+		template <bool _Const = Const>
+		std::enable_if_t <_Const, reference> operator* () const;
+		template <bool _Const = Const>
+		std::enable_if_t<!_Const, reference> operator* ();
+
+		Iterator<Const>& operator++ ();
+	};
+
 	HashTableWithOpenAddressing();
 	HashTableWithOpenAddressing(const HashTableWithOpenAddressing&);
 	~HashTableWithOpenAddressing();
+
+	Iterator<true> begin() const;
+	Iterator<true> end() const;
+
+	Iterator<false> begin();
+	Iterator<false> end();
 
 	V* find(const K& key);
 
@@ -37,13 +78,6 @@ public:
 	HashTableWithOpenAddressing<K, V>& operator= (const HashTableWithOpenAddressing<K, V>&);
 	const HashTableWithOpenAddressing<K, V>& operator= (const HashTableWithOpenAddressing<K, V>&) const;
 private:
-	struct HashNode : public HashTableBase<K, V>::HashNode {
-		bool isDeleted = false;
-
-		HashNode(const K& key, const V& value) : HashTableBase<K, V>::HashNode(key, value) {}
-		HashNode(const K& key) : HashTableBase<K, V>::HashNode(key) {}
-	};
-
 	void rehash(bool isLoaded);
 
 	HashNode **m_bucketsArray;
@@ -236,4 +270,67 @@ HashTableWithOpenAddressing<K, V>& HashTableWithOpenAddressing<K, V>::operator= 
 template <class K, class V>
 const HashTableWithOpenAddressing<K, V>& HashTableWithOpenAddressing<K, V>::operator= (const HashTableWithOpenAddressing<K, V>& other) const {
 	throw "You're trying to change const variable";
+}
+
+
+template <class K, class V> template <bool Const>
+HashTableWithOpenAddressing<K, V>::Iterator<Const>::Iterator (HashTableWithOpenAddressing<K, V>::Iterator<Const>::pointer ap, int acountdown) {
+	p = ap;
+	countdown = acountdown;
+
+	if (countdown && *p == NULL) {
+		++(*this);
+	}
+}
+
+template <class K, class V> template <bool Const>
+bool HashTableWithOpenAddressing<K, V>::Iterator<Const>::operator!= (const HashTableWithOpenAddressing<K, V>::Iterator<Const>& other) const {
+	return p != other.p;
+}
+
+template <class K, class V> template <bool Const>
+bool HashTableWithOpenAddressing<K, V>::Iterator<Const>::operator== (const HashTableWithOpenAddressing<K, V>::Iterator<Const>& other) const {
+	return p == other.p;
+}
+
+template <class K, class V> template <bool Const> template <bool _Const>
+std::enable_if_t <_Const, typename HashTableWithOpenAddressing<K, V>::Iterator<Const>::reference> 
+HashTableWithOpenAddressing<K, V>::Iterator<Const>::operator* () const {
+	return std::make_pair((*p)->key, (*p)->value);
+}
+
+template <class K, class V> template <bool Const> template <bool _Const>
+std::enable_if_t <!_Const, typename HashTableWithOpenAddressing<K, V>::Iterator<Const>::reference>
+HashTableWithOpenAddressing<K, V>::Iterator<Const>::operator* () {
+	return std::make_pair((*p)->key, (*p)->value);
+}
+
+template <class K, class V> template <bool Const>
+HashTableWithOpenAddressing<K, V>::Iterator<Const>& HashTableWithOpenAddressing<K, V>::Iterator<Const>::operator++ () {
+	do {
+		++p;
+		--countdown;
+	} while (countdown && (*p == NULL || (*p)->isDeleted));
+
+	return *this;
+}
+
+template <class K, class V>
+HashTableWithOpenAddressing<K, V>::Iterator<true> HashTableWithOpenAddressing<K, V>::begin() const {
+	return HashTableWithOpenAddressing<K, V>::Iterator<true>(m_bucketsArray, HashTableBase<K, V>::m_capacity);
+}
+
+template <class K, class V>
+HashTableWithOpenAddressing<K, V>::Iterator<true> HashTableWithOpenAddressing<K, V>::end() const {
+	return HashTableWithOpenAddressing<K, V>::Iterator<true>(m_bucketsArray + HashTableBase<K, V>::m_capacity, 0);
+}
+
+template <class K, class V>
+HashTableWithOpenAddressing<K, V>::Iterator<false> HashTableWithOpenAddressing<K, V>::begin() {
+	return HashTableWithOpenAddressing<K, V>::Iterator<false>(m_bucketsArray, HashTableBase<K, V>::m_capacity);
+}
+
+template <class K, class V>
+HashTableWithOpenAddressing<K, V>::Iterator<false> HashTableWithOpenAddressing<K, V>::end() {
+	return HashTableWithOpenAddressing<K, V>::Iterator<false>(m_bucketsArray + HashTableBase<K, V>::m_capacity, 0);
 }

@@ -157,7 +157,8 @@ void HashTableWithChains<K, V>::insert(const K& key, const V& value) {
 	size_t idx = HashTableBase<K, V>::hash(key);
 	m_bucketsArray[idx].pushBack(HashNode(key, value));
 	
-	if (float(++HashTableBase<K, V>::m_size) / HashTableBase<K, V>::m_capacity >= HashTableBase<K, V>::loadFactor) rehash(true);
+	if (float(++HashTableBase<K, V>::m_size) / HashTableBase<K, V>::m_capacity >= HashTableBase<K, V>::loadFactor) 
+		rehash(true);
 }
 
 template <class K, class V>
@@ -165,14 +166,16 @@ void HashTableWithChains<K, V>::erase(const K& key) {
 	size_t idx = HashTableBase<K, V>::hash(key);
 	size_t i = 0;
 	for (HashNode& hashNode : m_bucketsArray[idx]) {
-		if (hashNode.key == key) break;
-		i++;
-	}
+		if (!(hashNode.key == key)) {
+			i++;
+			continue;
+		}
 
-	if (i < m_bucketsArray[idx].getLength()) {
 		m_bucketsArray[idx].pop(i);
 
-		if (float(--HashTableBase<K, V>::m_size) / HashTableBase<K, V>::m_capacity <= HashTableBase<K, V>::unloadFactor) rehash(false);
+		if (float(--HashTableBase<K, V>::m_size) / HashTableBase<K, V>::m_capacity <= HashTableBase<K, V>::unloadFactor)
+			rehash(false);
+		return;
 	}
 }
 

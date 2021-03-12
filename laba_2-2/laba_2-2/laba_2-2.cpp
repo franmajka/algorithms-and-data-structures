@@ -3,6 +3,8 @@
 #include <ctime>
 #include <clocale>
 #include <string>
+#include <fstream>
+#include <regex>
 
 #include "ControlWork.h"
 
@@ -32,7 +34,7 @@ bool testHashTable()
         keysToFind[i] = keys[LongKey().getKey() % keysAmount];
     }
     // test my HashTable:
-    HashTableWithOpenAddressing<LongKey, ControlWork> hashTable;
+    HashTableWithChains<LongKey, ControlWork> hashTable;
 
     float myTotal = 0;
     float tempTime = 0;
@@ -75,18 +77,33 @@ bool testHashTable()
 
     // test STL hash table:
     unordered_map<LongKey, ControlWork> unorderedMap;
-    clock_t stlStart = clock();
+    float stlTotal = 0;
+    start = clock();
     for (int i = 0; i < iters; i++)
     {
         unorderedMap.insert({ keysToInsert[i], ControlWork() });
     }
+
+    tempTime = float(clock() - start) / CLOCKS_PER_SEC;
+    stlTotal += tempTime;
+    cout << "StlInsert " << tempTime << endl;
+
     size_t stlInsertSize = unorderedMap.size();
+
+    start = clock();
     for (int i = 0; i < iters; i++)
     {
         unorderedMap.erase(keysToErase[i]);
     }
+
+    tempTime = float(clock() - start) / CLOCKS_PER_SEC;
+    stlTotal += tempTime;
+    cout << "StlErase " << tempTime << endl;
+
     size_t stlEraseSize = unorderedMap.size();
     int stlFoundAmount = 0;
+
+    start = clock();
     for (int i = 0; i < iters; i++)
     {
         if (unorderedMap.find(keysToFind[i]) != unorderedMap.end())
@@ -94,13 +111,16 @@ bool testHashTable()
             stlFoundAmount++;
         }
     }
-    clock_t stlEnd = clock();
-    float stlTime = (float(stlEnd - stlStart)) / CLOCKS_PER_SEC;
+    
+    tempTime = float(clock() - start) / CLOCKS_PER_SEC;
+    stlTotal += tempTime;
+    cout << "StlFind " << tempTime << endl << endl;
+
     cout << "My HashTable:" << endl;
     cout << "Time: " << myTotal << ", size: " << myInsertSize << " - " << myEraseSize <<
         ", found amount: " << myFoundAmount << endl;
     cout << "STL unordered_map:" << endl;
-    cout << "Time: " << stlTime << ", size: " << stlInsertSize << " - " << stlEraseSize
+    cout << "Time: " << stlTotal << ", size: " << stlInsertSize << " - " << stlEraseSize
         << ", found amount: " << stlFoundAmount << endl << endl;
     delete[] keys;
     delete[] keysToInsert;
@@ -116,6 +136,52 @@ bool testHashTable()
     return false;
 }
 
+void countWords(string filenameIn = "in.txt", string filenameOut = "out.txt") {
+    HashTableWithOpenAddressing<string, int> hashTable;
+    LinkedList<pair<string, int>> lst;
+
+    ifstream fin(filenameIn);
+    regex wordRegex(R"((\w|[+’'À-ßà-ÿ¨¸])*)");
+
+    while (!fin.eof()) {
+        string tmp;
+        smatch sm;
+
+        fin >> tmp;
+
+        regex_search(tmp, sm, wordRegex);
+
+        string word = sm.str();
+        if (word == "") continue;
+
+        transform(word.begin(), word.end(), word.begin(), [](unsigned char c) { return std::tolower(c); });
+
+        int* found = hashTable.find(word);
+        if (found != NULL) {
+            hashTable.insert(word, *found + 1);
+        }
+        else {
+            hashTable.insert(word, 1);
+        }
+    }
+
+    fin.close();
+    
+    ofstream fout(filenameOut);
+
+    for (pair<string, int> p : hashTable) {
+        lst.pushBack(p);
+    }
+
+    lst.sort([](const pair<string, int>& l, const pair<string, int>& r) { return l.second > r.second; });
+
+    for (const pair<string, int>& p : lst) {
+        fout << p.first << ": " << p.second << endl;
+    }
+
+    fout.close();
+}
+
 
 int main()
 {
@@ -123,19 +189,14 @@ int main()
     srand(time(NULL));
 
     testHashTable();
+    //countWords();
 
-    /*HashTableWithOpenAddressing<string, ControlWork> hashTable;
+    /*LinkedList<int> lst = { 2, 3, 4 };
+    LinkedList<int> lst2 = { 6, 7, 8 };
 
-    ControlWork c1, c2;
+    lst += 1 + LinkedList<int>{ 1, 2 };
 
-    cout << c1 << endl;
-    cout << c2 << endl;
-
-    hashTable.insert("c1", c1);
-    cout << hashTable["c1"] << endl;
-    hashTable["c1"] = c2;
-
-    cout << hashTable["c1"] << endl;*/
+    lst.print();*/
 
     return 0;
 }

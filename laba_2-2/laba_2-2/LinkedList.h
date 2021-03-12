@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <type_traits>
 
 
 template <class T>
@@ -22,71 +23,117 @@ private:
 
 public:
 
+    template <bool Const = false>
     class Iterator {
-        friend class LinkedList;
-    private:
-        Node* p;
+        friend class LinkedList<T>;
 
-        Iterator(Node* p) : p(p) {}
+    public:
+        using pointer = std::conditional_t<Const, const Node*, Node*>;
+        using reference = std::conditional_t<Const, const T&, T&>;
+
+    private:
+        pointer p;
+
+        Iterator(pointer p) : p(p) {}
     public:
         Iterator(const Iterator& it) : p(it.p) {}
 
-        bool operator!= (Iterator&) const;
-        bool operator== (Iterator&) const;
+        bool operator!= (Iterator<Const>&) const;
+        bool operator== (Iterator<Const>&) const;
 
-        T& operator* () const;
-        Iterator operator++ ();
-        Iterator operator-- ();
+        template <bool _Const = Const>
+        std::enable_if_t<_Const, reference> operator* () const;
+        template <bool _Const = Const>
+        std::enable_if_t<!_Const, reference> operator* ();
+
+        Iterator<Const>& operator++ ();
+        Iterator<Const>& operator-- ();
     };
 
     LinkedList() : m_length(0), m_head(NULL), m_tail(NULL) {}
     LinkedList(std::initializer_list<T> values);
-    LinkedList(LinkedList<T>&);
+    LinkedList(const LinkedList<T>&);
     ~LinkedList();
 
+    friend LinkedList<T> operator+ (const T& el, LinkedList<T> lst) {
+        lst.pushFront(el);
+        return lst;
+    }
+
+    friend LinkedList<T> operator+ (LinkedList<T> lst, const T& el) {
+        lst.pushBack(el);
+        return lst;
+    }
+
+    friend LinkedList<T> operator+ (LinkedList<T> left, const LinkedList<T>& right) {
+        for (const T& el : right) {
+            left.pushBack(el);
+        }
+        return left;
+    }
+
+    LinkedList<T>& operator= (const LinkedList<T>& lst);
+    LinkedList<T>& operator+= (const T& el);
+    LinkedList<T>& operator+= (const LinkedList<T>& lst);
+
     T& operator[] (int);
+    const T& operator[] (int) const;
 
-    Iterator begin();
-    Iterator end();
+    Iterator<false> begin();
+    Iterator<false> end();
 
-    void pushBack(T);
+    Iterator<true> begin() const;
+    Iterator<true> end() const;
+
+    void sort(bool (*compare)(const T& left, const T& right));
+
+    void pushBack(T value);
     T popBack();
 
-    void pushFront(T);
+    void pushFront(T value);
     T popFront();
 
-    void insert(T, size_t);
-    T pop(size_t);
+    void insert(T value, size_t idx);
+    T pop(size_t idx);
 
-    T getElem(int);
-    size_t getLength();
+    T getElem(int idx);
+    size_t size();
     void print();
+
+    void clear();
 };
 
-template <class T>
-bool LinkedList<T>::Iterator::operator!= (LinkedList<T>::Iterator &it) const {
+template <class T> template <bool Const>
+bool LinkedList<T>::Iterator<Const>::operator!= (LinkedList<T>::Iterator<Const> &it) const {
     return p != it.p;
 }
 
-template <class T>
-bool LinkedList<T>::Iterator::operator== (LinkedList<T>::Iterator& it) const {
+template <class T> template <bool Const>
+bool LinkedList<T>::Iterator<Const>::operator== (LinkedList<T>::Iterator<Const>& it) const {
     return p == it.p;
 }
 
 
-template <class T>
-T& LinkedList<T>::Iterator::operator* () const {
+template <class T> template <bool Const> template <bool _Const>
+std::enable_if_t<_Const, typename LinkedList<T>::Iterator<Const>::reference> LinkedList<T>::Iterator<Const>::operator* () const {
     return p->value;
 }
 
-template <class T>
-typename LinkedList<T>::Iterator LinkedList<T>::Iterator::operator++ () {
+template <class T> template <bool Const> template <bool _Const>
+std::enable_if_t<!_Const, typename LinkedList<T>::Iterator<Const>::reference> LinkedList<T>::Iterator<Const>::operator* ()
+{
+    return p->value;
+}
+
+
+template <class T> template <bool Const>
+LinkedList<T>::Iterator<Const>& LinkedList<T>::Iterator<Const>::operator++ () {
     p = p ? p->next : NULL;
     return *this;
 }
 
-template <class T>
-typename LinkedList<T>::Iterator LinkedList<T>::Iterator::operator-- () {
+template <class T> template <bool Const>
+LinkedList<T>::Iterator<Const>& LinkedList<T>::Iterator<Const>::operator-- () {
     p = p ? p->prev : NULL;
     return *this;
 }
@@ -94,14 +141,20 @@ typename LinkedList<T>::Iterator LinkedList<T>::Iterator::operator-- () {
 
 template <class T>
 LinkedList<T>::LinkedList(std::initializer_list<T> values) {
-    for (const T &i : values) {
-        this->pushBack(i);
-    }
+    m_length = 0;
+    m_head = NULL;
+    m_tail = NULL;
+
+    for (const T& i : values) pushBack(i);
 }
 
 template <class T>
-LinkedList<T>::LinkedList(LinkedList<T>& lst) {
-    for (const int& i : lst) this->pushBack(i);
+LinkedList<T>::LinkedList(const LinkedList<T>& lst) {
+    m_length = 0;
+    m_head = NULL;
+    m_tail = NULL;
+
+    for (const T& i : lst) pushBack(i);
 }
 
 template <class T>
@@ -115,13 +168,48 @@ LinkedList<T>::~LinkedList() {
 }
 
 template <class T>
-typename LinkedList<T>::Iterator LinkedList<T>::begin() {
-    return LinkedList<T>::Iterator(m_head);
+LinkedList<T>::Iterator<false> LinkedList<T>::begin() {
+    return Iterator<false>(m_head);
 }
 
 template <class T>
-typename LinkedList<T>::Iterator LinkedList<T>::end() {
-    return LinkedList<T>::Iterator(NULL);
+LinkedList<T>::Iterator<false> LinkedList<T>::end() {
+    return Iterator<false>(NULL);
+}
+
+template <class T>
+LinkedList<T>::Iterator<true> LinkedList<T>::begin() const {
+    return Iterator<true>(m_head);
+}
+
+template <class T>
+LinkedList<T>::Iterator<true> LinkedList<T>::end() const {
+    return Iterator<true>(NULL);
+}
+
+
+template <class T>
+void LinkedList<T>::sort(bool (*compare)(const T& left, const T& right)) {
+    if (size() < 2) return;
+
+    LinkedList<T> left, right;
+    T pivot = popFront();
+
+    while (size()) {
+        T el = popFront();
+
+        if (compare(el, pivot)) {
+            left.pushBack(el);
+        }
+        else {
+            right.pushBack(el);
+        }
+    }
+
+    left.sort(compare);
+    right.sort(compare);
+    
+    *this = left + pivot + right;
 }
 
 
@@ -290,6 +378,11 @@ T& LinkedList<T>::operator[] (int idx) {
     return getNode(idx)->value;
 }
 
+template <class T>
+const T& LinkedList<T>::operator[] (int idx) const {
+    return getNode(idx)->value;
+}
+
 
 template <class T>
 T LinkedList<T>::getElem(int idx) {
@@ -297,7 +390,7 @@ T LinkedList<T>::getElem(int idx) {
 }
 
 template <class T>
-size_t LinkedList<T>::getLength() {
+size_t LinkedList<T>::size() {
     return m_length;
 }
 
@@ -312,4 +405,64 @@ void LinkedList<T>::print() {
     for (Node* current = m_head; current != NULL; current = current->next, counter++) {
         std::cout << counter << ") " << current->value << std::endl;
     }
+}
+
+template <class T>
+void LinkedList<T>::clear()
+{
+    while (size()) popFront();
+}
+
+
+//template <class T>
+//LinkedList<T> operator+ (const T& el, LinkedList<T> lst)
+//{
+//    lst.pushFront(el);
+//    return lst;
+//}
+
+//template <class T>
+//LinkedList<T> operator+ (LinkedList<T> lst, const T& el)
+//{
+//    lst.pushBack(el);
+//    return lst;
+//}
+
+//template <class T>
+//LinkedList<T> operator+ (LinkedList<T> left, const LinkedList<T>& right)
+//{
+//    for (const T& el : right) {
+//        left.pushBack(el);
+//    }
+//    return left;
+//}
+
+template<class T>
+LinkedList<T>& LinkedList<T>::operator= (const LinkedList<T>& lst)
+{
+    if (this == &lst) return *this;
+
+    clear();
+    for (const T& el : lst) {
+        pushBack(el);
+    }
+
+    return *this;
+}
+
+template<class T>
+LinkedList<T>& LinkedList<T>::operator+= (const T& el)
+{
+    pushBack(el);
+    return *this;
+}
+
+template<class T>
+LinkedList<T>& LinkedList<T>::operator+= (const LinkedList<T>& lst)
+{
+    for (const T& el : lst) {
+        pushBack(el);
+    }
+
+    return *this;
 }
