@@ -5,7 +5,9 @@
 
 template <class T>
 class LinkedList {
-
+public:
+    using value_type = T;
+    
 private:
     struct Node {
         T value;
@@ -28,6 +30,7 @@ public:
         friend class LinkedList<T>;
 
     public:
+        using value_type = T;
         using pointer = std::conditional_t<Const, const Node*, Node*>;
         using reference = std::conditional_t<Const, const T&, T&>;
 
@@ -208,7 +211,7 @@ void LinkedList<T>::sort(bool (*compare)(const T& left, const T& right)) {
 
     left.sort(compare);
     right.sort(compare);
-    
+
     *this = left + pivot + right;
 }
 
@@ -233,7 +236,7 @@ void LinkedList<T>::pushBack(T value) {
 template <class T>
 T LinkedList<T>::popBack() {
     if (m_tail == NULL) throw "List is empty";
-    
+
     m_length--;
 
     Node* tmp = m_tail;
@@ -413,29 +416,6 @@ void LinkedList<T>::clear()
     while (size()) popFront();
 }
 
-
-//template <class T>
-//LinkedList<T> operator+ (const T& el, LinkedList<T> lst)
-//{
-//    lst.pushFront(el);
-//    return lst;
-//}
-
-//template <class T>
-//LinkedList<T> operator+ (LinkedList<T> lst, const T& el)
-//{
-//    lst.pushBack(el);
-//    return lst;
-//}
-
-//template <class T>
-//LinkedList<T> operator+ (LinkedList<T> left, const LinkedList<T>& right)
-//{
-//    for (const T& el : right) {
-//        left.pushBack(el);
-//    }
-//    return left;
-//}
 
 template<class T>
 LinkedList<T>& LinkedList<T>::operator= (const LinkedList<T>& lst)

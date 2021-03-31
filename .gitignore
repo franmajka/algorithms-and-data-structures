@@ -1,6 +1,9 @@
 .vscode
 .vs
 x64
+*.idb
+*.pdb
+*.ilk
 *.sln
 *.vcxproj
 *.filters

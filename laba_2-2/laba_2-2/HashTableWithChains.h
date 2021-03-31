@@ -34,7 +34,7 @@ public:
 	HashTableWithChains<K, V>& operator= (const HashTableWithChains<K, V>&);
 	const HashTableWithChains<K, V>& operator= (const HashTableWithChains<K, V>&) const;
 private:
-	
+
 	void rehash(bool isLoaded);
 
 	LinkedList<HashNode> *m_bucketsArray;
@@ -51,7 +51,7 @@ HashTableWithChains<K, V>::HashTableWithChains(const HashTableWithChains& other)
 	m_bucketsArray = new LinkedList<HashNode>[HashTableBase<K, V>::m_capacity];
 
 	for (size_t i = 0; i < other.m_capacity; i++) {
-		for (HashTableWithChains<K, V>::HashNode& hashNode : other.m_bucketsArray[i]) {
+		for (const HashNode& hashNode : other.m_bucketsArray[i]) {
 			insert(hashNode.key, hashNode.value);
 		}
 	}
@@ -65,17 +65,19 @@ HashTableWithChains<K, V>::~HashTableWithChains() {
 
 template <class K, class V>
 void HashTableWithChains<K, V>::rehash(bool isLoaded) {
+	if (!isLoaded && HashTableBase<K, V>::m_capacity <= 8) return;
+
 	LinkedList<HashNode>* originalBucketsArray = m_bucketsArray;
 	size_t originalCapacity = HashTableBase<K, V>::m_capacity;
 
 	HashTableBase<K, V>::m_size = 0;
-	HashTableBase<K, V>::m_capacity = isLoaded ? 
-		HashTableBase<K, V>::m_capacity * ALPHA : 
+	HashTableBase<K, V>::m_capacity = isLoaded ?
+		HashTableBase<K, V>::m_capacity * ALPHA :
 		HashTableBase<K, V>::m_capacity / ALPHA;
 	m_bucketsArray = new LinkedList<HashNode>[HashTableBase<K, V>::m_capacity];
 
 	for (size_t i = 0; i < originalCapacity; i++) {
-		for (HashNode& hashNode : originalBucketsArray[i]) {
+		for (const HashNode& hashNode : originalBucketsArray[i]) {
 			insert(hashNode.key, hashNode.value);
 		}
 	}
@@ -121,7 +123,7 @@ const V& HashTableWithChains<K, V>::operator[] (const K& key) const {
 	throw "There is no such key in the hash table";
 }
 
-template <class K, class V> template <class T> 
+template <class K, class V> template <class T>
 const V& HashTableWithChains<K, V>::operator[] (const T& key) const {
 	return (*this)[K(key)];
 }
@@ -132,7 +134,7 @@ HashTableWithChains<K, V>& HashTableWithChains<K, V>::operator= (const HashTable
 	clear();
 
 	for (size_t i = 0; i < other.m_capacity; i++) {
-		for (HashTableWithChains<K, V>::HashNode& hashNode : other.m_bucketsArray[i]) {
+		for (const HashNode& hashNode : other.m_bucketsArray[i]) {
 			insert(hashNode.key, hashNode.value);
 		}
 	}
@@ -156,8 +158,8 @@ void HashTableWithChains<K, V>::insert(const K& key, const V& value) {
 
 	size_t idx = HashTableBase<K, V>::hash(key);
 	m_bucketsArray[idx].pushBack(HashNode(key, value));
-	
-	if (float(++HashTableBase<K, V>::m_size) / HashTableBase<K, V>::m_capacity >= HashTableBase<K, V>::loadFactor) 
+
+	if (float(++HashTableBase<K, V>::m_size) / HashTableBase<K, V>::m_capacity >= HashTableBase<K, V>::loadFactor)
 		rehash(true);
 }
 
@@ -165,7 +167,7 @@ template <class K, class V>
 void HashTableWithChains<K, V>::erase(const K& key) {
 	size_t idx = HashTableBase<K, V>::hash(key);
 	size_t i = 0;
-	for (HashNode& hashNode : m_bucketsArray[idx]) {
+	for (const HashNode& hashNode : m_bucketsArray[idx]) {
 		if (!(hashNode.key == key)) {
 			i++;
 			continue;

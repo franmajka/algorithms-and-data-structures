@@ -12,7 +12,7 @@
 template <class K, class V>
 class HashTableWithOpenAddressing : public HashTableBase<K, V>
 {
-private: 
+private:
 	struct HashNode : public HashTableBase<K, V>::HashNode {
 		bool isDeleted = false;
 
@@ -119,6 +119,8 @@ size_t HashTableWithOpenAddressing<K, V>::hashSecondary(const K& key) {
 
 template <class K, class V>
 void HashTableWithOpenAddressing<K, V>::rehash(bool isLoaded) {
+	if (!isLoaded && HashTableBase<K, V>::m_capacity <= 8) return;
+
 	HashNode **originalBucketsArray = m_bucketsArray;
 	size_t originalCapacity = HashTableBase<K, V>::m_capacity;
 
@@ -292,6 +294,7 @@ template <class K, class V> template <bool Const>
 bool HashTableWithOpenAddressing<K, V>::Iterator<Const>::operator== (const HashTableWithOpenAddressing<K, V>::Iterator<Const>& other) const {
 	return p == other.p;
 }
+
 
 template <class K, class V> template <bool Const> template <bool _Const>
 std::enable_if_t <_Const, typename HashTableWithOpenAddressing<K, V>::Iterator<Const>::reference> 
