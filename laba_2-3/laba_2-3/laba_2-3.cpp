@@ -5,8 +5,10 @@
 #include <iterator>
 #include <vector>
 #include <functional>
+#include <clocale>
 
 #include "PriorityQueue.h"
+#include "Graph.h"
 #include "HomeTask.h"
 
 using namespace std;
@@ -107,26 +109,102 @@ void heapSort(Container& container, Comparator cmp = Comparator{}) {
 
     Heap<typename Container::value_type, Comparator> heap(container.begin(), container.end());
 
-    for (auto it = container.end() - 1; ; --it) {
+    for (auto it = prev(container.end()); ; --it) {
         *it = heap.popTop();
         if (it == container.begin()) break;
     }
 }
 
+template <class Iterator, class Comparator>
+void quickSort(const Iterator& begin, const Iterator& end, Comparator comp) {
+    if (distance(begin, end) <= 1) return;
+
+    Iterator pi = prev(end);
+    Iterator leftest = begin;
+
+    for (Iterator it = begin; it != pi; ++it) {
+        if (comp(*pi, *it)) continue;
+
+        swap(*it, *leftest);
+        ++leftest;
+    }
+
+    swap(*leftest, *pi);
+
+    quickSort(begin, leftest, comp);
+    quickSort(leftest + 1, end, comp);
+}
+
+void testSort() {
+    const int iters = 1e6;
+    vector<int> vec;
+
+    cout << "Number of elements: " << iters << endl << endl;
+
+    for (int i = 0; i < iters; i++) {
+        vec.push_back(rand() % iters);
+    }
+
+    vector<int> standart = vec;
+
+    clock_t start = clock();
+    sort(standart.begin(), standart.end());
+    float time = float(clock() - start) / CLOCKS_PER_SEC;
+
+    cout << "std::sort: " << time << "s" << endl << endl;
+
+
+    vector<int> copy = vec;
+
+    start = clock();
+    heapSort(copy);
+    time = float(clock() - start) / CLOCKS_PER_SEC;
+
+    cout << "heapSort: " << time << "s" << endl;
+    if (standart == copy) cout << "They're absolutely the same" << endl << endl;
+    else cout << ":(" << endl << endl;
+
+
+    copy = vec;
+
+    start = clock();
+    quickSort(copy.begin(), copy.end(), less<int>{});
+    time = float(clock() - start) / CLOCKS_PER_SEC;
+
+    cout << "quickSort: " << time << "s" << endl;
+    if (standart == copy) cout << "They're absolutely the same" << endl << endl;
+    else cout << ":(" << endl << endl;
+}
+
+void testDijkstra() {
+    Graph<int> g = {
+        {0, {1, 4}},
+        {0, {7, 8}},
+        {1, {2, 8}},
+        {1, {7, 11}},
+        {2, {3, 7}},
+        {2, {8, 2}},
+        {2, {5, 4}},
+        {3, {4, 9}},
+        {3, {5, 14}},
+        {4, {5, 10}},
+        {5, {6, 2}},
+        {6, {7, 1}},
+        {6, {8, 6}},
+        {7, {8, 7}},
+    };
+
+    for (const pair<int, int>& p : g.shortestPath(0)) {
+        cout << p.first << " — " << p.second << endl;
+    }
+}
+
 int main()
 {
+    setlocale(LC_ALL, "rus");
 	srand(time(NULL));
 
-    //int* arr = new int[10];
-    vector<int> arr;
-    for (int i = 0; i < 10; i++) {
-        arr.push_back(rand() % 100);
-        cout << arr[i] << " ";
-    }
-    cout << endl;
+    testPriorityQueue();
 
-    heapSort(arr, greater<int>{});
-
-    for (int i = 0; i < 10; i++) cout << arr[i] << " ";
 	return 0;
 }

@@ -2,7 +2,7 @@
 
 #include "Heap.h"
 
-template <class T>
+template <class T, class Comparator = std::less<T>>
 class PriorityQueue
 {
 public:
@@ -13,35 +13,35 @@ public:
 	int size();
 	bool empty();
 private:
-	Heap<T> heap;
+	Heap<T, Comparator> heap;
 };
 
-template<class T>
-void PriorityQueue<T>::push(const T& el)
+template<class T, class Comparator>
+void PriorityQueue<T, Comparator>::push(const T& el)
 {
 	heap.append(el);
 }
 
-template<class T>
-T PriorityQueue<T>::top()
+template<class T, class Comparator>
+T PriorityQueue<T, Comparator>::top()
 {
 	return heap.getTop();
 }
 
-template<class T>
-T PriorityQueue<T>::pop()
+template<class T, class Comparator>
+T PriorityQueue<T, Comparator>::pop()
 {
 	return heap.popTop();
 }
 
-template<class T>
-int PriorityQueue<T>::size()
+template<class T, class Comparator>
+int PriorityQueue<T, Comparator>::size()
 {
 	return heap.size();
 }
 
-template<class T>
-bool PriorityQueue<T>::empty()
+template<class T, class Comparator>
+bool PriorityQueue<T, Comparator>::empty()
 {
 	return !heap.size();
 }

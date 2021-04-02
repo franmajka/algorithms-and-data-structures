@@ -133,6 +133,7 @@ int Heap<T, Comparator>::validIdx(int idx) const
 template <class T, class Comparator>
 int Heap<T, Comparator>::getParentIdx(int idx) const
 {
+	if (!idx) return -1;
 	int parentIdx = (idx - 1) / 2;
 	return validIdx(parentIdx);
 }
@@ -199,7 +200,7 @@ template<class T, class Comparator>
 template <class Iterator>
 Heap<T, Comparator>::Heap(const Iterator& begin, const Iterator& end)
 {
-	m_size = end - begin;
+	m_size = distance(begin, end);
 	m_capacity = m_size + 1;
 	m_arr = new T[m_capacity];
 
