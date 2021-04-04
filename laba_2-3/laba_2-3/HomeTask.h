@@ -13,9 +13,9 @@ struct HomeTask
 
 	uint8_t getPriority() const;
 
-	bool operator< (const HomeTask& other) const;
+	bool operator<	(const HomeTask& other) const;
 	bool operator== (const HomeTask& other) const;
-	bool operator> (const HomeTask& other) const;
+	bool operator>	(const HomeTask& other) const;
 	bool operator<= (const HomeTask& other) const;
 	bool operator>= (const HomeTask& other) const;
 	bool operator!= (const HomeTask& other) const;

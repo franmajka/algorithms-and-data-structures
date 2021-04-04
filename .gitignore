@@ -1,6 +1,8 @@
 .vscode
 .vs
 x64
+Release
+Debug
 *.idb
 *.pdb
 *.ilk

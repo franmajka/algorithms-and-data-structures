@@ -6,9 +6,12 @@
 #include <vector>
 #include <functional>
 #include <clocale>
+#include <fstream>
 
 #include "PriorityQueue.h"
 #include "Graph.h"
+#include "HuffmanEncoder.h"
+#include "HuffmanDecoder.h"
 #include "HomeTask.h"
 
 using namespace std;
@@ -199,12 +202,28 @@ void testDijkstra() {
     }
 }
 
+void testHuffman() {
+    ifstream fin("data.txt");
+    HuffmanEncoder he(fin);
+    ofstream bfout("out.bin", ios::binary);
+    he.encode(bfout);
+
+    fin.close();
+    bfout.close();
+
+    ofstream fout("out.txt");
+    HuffmanDecoder hd("out.bin");
+    hd.decode(fout);
+
+    fout.close();
+}
+
 int main()
 {
     setlocale(LC_ALL, "rus");
 	srand(time(NULL));
 
-    testPriorityQueue();
+    testHuffman();
 
 	return 0;
 }
