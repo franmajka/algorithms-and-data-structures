@@ -1,5 +1,6 @@
 ﻿#include <set>
 #include <vector>
+#include <map>
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
@@ -7,6 +8,7 @@
 #include <fstream>
 
 #include "BinarySearchTree.h"
+#include "SplayTree.h"
 #include "Player.h"
 #include "Trie.h"
 
@@ -153,11 +155,185 @@ void testTrie() {
     } while (getc(stdin) == 'y');
 }
 
+bool testSplayTree()
+{
+    const int iters = 500000;
+    const int keysAmount = iters * 1;
+    // generate random keys:
+    long* keys = new long[keysAmount];
+    long* keysToInsert = new long[iters];
+    long* keysToErase = new long[iters];
+    long* keysToFind = new long[iters];
+    long* narrowRangeFind = new long[iters];
+    for (int i = 0; i < keysAmount; i++)
+    {
+        keys[i] = rand() % iters;
+    }
+    for (int i = 0; i < iters; i++)
+    {
+        keysToInsert[i] = keys[rand() % keysAmount];
+        keysToErase[i] = keys[rand() % keysAmount];
+        keysToFind[i] = keys[rand() % keysAmount];
+        narrowRangeFind[i] = keys[rand() % (keysAmount / 1000)];
+    }
+    // test my map:
+    SplayTree<long, Player> myTree;
+    float myTotal = 0;
+    float tempTime = 0;
+    clock_t start = clock();
+
+    for (int i = 0; i < iters; i++)
+    {
+        myTree.insert({ keysToInsert[i], Player() });
+    }
+    size_t myInsertSize = myTree.size();
+
+    tempTime = float(clock() - start) / CLOCKS_PER_SEC;
+    myTotal += tempTime;
+    cout << "MyInsert " << tempTime << endl;
+
+    /*start = clock();
+    for (int i = 0; i < iters; i++)
+    {
+        myTree.erase(keysToErase[i]);
+    }
+    size_t myEraseSize = myTree.size();
+
+    tempTime = float(clock() - start) / CLOCKS_PER_SEC;
+    myTotal += tempTime;
+    cout << "MyErase " << tempTime << endl;*/
+
+    start = clock();
+    int myFoundAmount = 0;
+    for (int i = 0; i < iters; i++)
+    {
+        if (myTree.find(keysToFind[i]) != myTree.end())
+        {
+            myFoundAmount++;
+        }
+    }
+
+    tempTime = float(clock() - start) / CLOCKS_PER_SEC;
+    myTotal += tempTime;
+    cout << "MyFind " << tempTime << endl;
+
+    start = clock();
+    int myNarrowFoundAmount = 0;
+    for (int i = 0; i < iters; i++)
+    {
+        if (myTree.find(narrowRangeFind[i]) != myTree.end())
+        {
+            myNarrowFoundAmount++;
+        }
+    }
+
+    tempTime = float(clock() - start) / CLOCKS_PER_SEC;
+    myTotal += tempTime;
+    cout << "MyNarrowRangeFind " << tempTime << endl << endl;
+
+    // test STL map:
+    map<long, Player> stlMap;
+    float stlTotal = 0;
+    start = clock();
+    for (int i = 0; i < iters; i++)
+    {
+        stlMap.insert({ keysToInsert[i], Player() });
+    }
+
+    tempTime = float(clock() - start) / CLOCKS_PER_SEC;
+    stlTotal += tempTime;
+    cout << "StlInsert " << tempTime << endl;
+
+    size_t stlInsertSize = stlMap.size();
+
+    /*start = clock();
+    for (int i = 0; i < iters; i++)
+    {
+        stlMap.erase(keysToErase[i]);
+    }
+
+    tempTime = float(clock() - start) / CLOCKS_PER_SEC;
+    stlTotal += tempTime;
+    cout << "StlErase " << tempTime << endl;*/
+
+    size_t stlEraseSize = stlMap.size();
+    int stlFoundAmount = 0;
+
+    start = clock();
+    for (int i = 0; i < iters; i++)
+    {
+        if (stlMap.find(keysToFind[i]) != stlMap.end())
+        {
+            stlFoundAmount++;
+        }
+    }
+
+    tempTime = float(clock() - start) / CLOCKS_PER_SEC;
+    stlTotal += tempTime;
+    cout << "StlFind " << tempTime << endl;
+
+    start = clock();
+    int stlNarrowFoundAmount = 0;
+    for (int i = 0; i < iters; i++)
+    {
+        if (stlMap.find(narrowRangeFind[i]) != stlMap.end())
+        {
+            stlNarrowFoundAmount++;
+        }
+    }
+
+    tempTime = float(clock() - start) / CLOCKS_PER_SEC;
+    stlTotal += tempTime;
+    cout << "StlNarrowRangeFind " << tempTime << endl << endl;
+
+    cout << "My SplayTree:" << endl;
+    cout << "Time: " << myTotal << ", size: " << myInsertSize /*<< " - " << myEraseSize*/ <<
+        ", found amount: " << myFoundAmount << endl;
+    cout << "STL map:" << endl;
+    cout << "Time: " << stlTotal << ", size: " << stlInsertSize /*<< " - " << stlEraseSize */
+        << ", found amount: " << stlFoundAmount << endl << endl;
+    delete[] keys;
+    delete[] keysToInsert;
+    delete[] keysToErase;
+    delete[] keysToFind;
+    delete[] narrowRangeFind;
+    if (myInsertSize == stlInsertSize /*&& myEraseSize == stlEraseSize*/ && myFoundAmount ==
+        stlFoundAmount && myNarrowFoundAmount == stlNarrowFoundAmount)
+    {
+        cout << "The lab is completed" << endl;
+        return true;
+    }
+    cerr << ":(" << endl;
+    return false;
+}
+
 int main()
 {
     srand(time(NULL));
     //testBinarySearchTree();
     testTrie();
+    //testSplayTree();
+    /*SplayTree<int, string> splayTree = {
+        { 10, "chel" },
+        { 8, "lox" },
+        { 9, "ti" },
+    };
+
+    for (const auto& p : splayTree) {
+        cout << p.first.get() << " " << p.second.get() << endl;
+    }
+
+    auto it = splayTree.find(8);
+    cout << (*it).first.get() << " " << (*it).second.get() << endl;
+
+    (*it).second.get() = "dad";
+
+    splayTree.erase(9);
+
+    for (const auto& p : splayTree) {
+        cout << p.first.get() << " " << p.second.get() << endl;
+    }*/
+
 
     /*BinarySearchTree<int> tree = { 40, 30, 50, 35, 32 };
     tree.print();

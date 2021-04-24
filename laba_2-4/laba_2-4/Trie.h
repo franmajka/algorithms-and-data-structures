@@ -12,6 +12,7 @@ public:
     Trie() {}
     Trie(std::ifstream& fin);
     Trie(std::initializer_list<std::string> words);
+
     void insert(const std::string& word);
 
     std::vector<std::string> findByPrefix(const std::string& prefix);
@@ -25,7 +26,7 @@ private:
         Node() : Node(false) {}
     };
 
-    void bypass(const std::unordered_map<char, Node>& table, std::vector<std::string>& words, const std::string& prefix) const;
+    static void bypass(const std::unordered_map<char, Node>& table, std::vector<std::string>& words, const std::string& prefix);
 
     std::unordered_map<char, Node> m_firstLetters;
 };

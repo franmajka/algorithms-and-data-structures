@@ -14,6 +14,8 @@ private:
 public:
 	using value_type = Value;
 
+	struct Iterator;
+
 	BinarySearchTree();
 	template <class Iter>
 	BinarySearchTree(const Iter& begin, const Iter& end);
@@ -21,6 +23,7 @@ public:
 	BinarySearchTree(const BinarySearchTree& tree) : BinarySearchTree(tree.m_root) {}
 	~BinarySearchTree();
 
+	Iterator find(const Value& value) const;
 	bool has(const Value& value) const;
 	void insert(const Value& value);
 	void erase(const Value& value);
@@ -202,17 +205,24 @@ BinarySearchTree<Value, Comparator>::~BinarySearchTree()
 }
 
 template<class Value, class Comparator>
-bool BinarySearchTree<Value, Comparator>::has(const Value& value) const
+typename BinarySearchTree<Value, Comparator>::Iterator 
+BinarySearchTree<Value, Comparator>::find(const Value& value) const
 {
 	for (
-		Node* current = m_root; 
-		current != NULL; 
+		Node* current = m_root;
+		current != NULL;
 		current = Comparator()(current->value, value) ? current->rightChild : current->leftChild
 	) {
-		if (current->value == value) return true;
+		if (current->value == value) return Iterator(current);
 	}
 
-	return false;
+	return end();
+}
+
+template<class Value, class Comparator>
+bool BinarySearchTree<Value, Comparator>::has(const Value& value) const
+{
+	return find(value) != end();
 }
 
 template<class Value, class Comparator>
@@ -590,6 +600,14 @@ void BinarySearchTree<Value, Comparator>::Node::erase()
 	}
 
 	if (leftChild && rightChild) {
+		if (bfactor() > 0) {
+			Node* predecessor = prev();
+			value = predecessor->value;
+
+			predecessor->erase();
+			return;
+		}
+
 		Node* successor = next();
 		value = successor->value;
 

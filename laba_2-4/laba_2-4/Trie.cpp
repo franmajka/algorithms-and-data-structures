@@ -55,7 +55,7 @@ std::vector<std::string> Trie::findByPrefix(const std::string& prefix)
 }
 
 void Trie::bypass
-(const std::unordered_map<char, typename Trie::Node>& table, std::vector<std::string>& words, const std::string& prefix) const
+(const std::unordered_map<char, typename Trie::Node>& table, std::vector<std::string>& words, const std::string& prefix)
 {
 	for (const auto& p : table) {
 		if (p.second.isEnd) words.push_back(prefix + p.first);
